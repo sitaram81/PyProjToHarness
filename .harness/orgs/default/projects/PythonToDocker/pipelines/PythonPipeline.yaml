@@ -111,14 +111,31 @@ pipeline:
                     command: |-
                       echo "=== Step 7: Deleting Docker Hub Image ==="
                       echo ""
-                      TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username":"<+variable.Dockeruser>","password":"<+secrets.getValue("Docker_Passcode")>"}' https://hub.docker.com/v2/users/login/ | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
+
+                      # Use Harness variables directly in shell, not inside JSON quotes
+                      USER=<+variable.Dockeruser>
+                      PASS=<+secrets.getValue("Docker_Passcode")>
+
+                      # Authenticate
+                      TOKEN=$(curl -s -H "Content-Type: application/json" \
+                        -X POST \
+                        -d "{\"username\":\"$USER\",\"password\":\"$PASS\"}" \
+                        https://hub.docker.com/v2/users/login/ \
+                        | python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))")
+
+                      if [ -z "$TOKEN" ]; then
+                        echo "❌ Login failed. Check username/password."
+                        exit 1
+                      fi
+
                       echo "Logged in to Docker Hub API"
-                      echo ""
-                      echo "Deleting entire repository: <+variable.Dockeruser>/python_project"
-                      curl -s -X DELETE -H "Authorization: JWT $TOKEN" https://hub.docker.com/v2/repositories/<+variable.Dockeruser>/python_project/
-                      echo ""
-                      echo "=== Repository Deleted! ==="
-                      echo "Next run will create it fresh again."
+                      echo "Deleting entire repository: $USER/python_project"
+
+                      # Delete repo
+                      curl -s -X DELETE -H "Authorization: JWT $TOKEN" \
+                        https://hub.docker.com/v2/repositories/$USER/python_project/
+
+                      echo "=== Repository Deleted! ===""
               - step:
                   type: Run
                   name: Final Verify
