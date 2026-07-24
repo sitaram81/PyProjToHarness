@@ -38,9 +38,9 @@ pipeline:
                     shell: Sh
                     command: |-
                       echo "=== Step 1: Installing Dependencies ==="
-                                            cd python-project
-                                            pip install -r requirements.txt
-                                            echo "=== Dependencies Installed! ==="
+                      cd python-project
+                      pip install -r requirements.txt
+                      echo "=== Dependencies Installed! ==="
               - step:
                   type: Run
                   name: Run unit tests
