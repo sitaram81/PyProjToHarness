@@ -19,7 +19,7 @@ pipeline:
   ##################################################
   # CHANGE THIS: Your project ID
   ###################################################
-  projectIdentifier: HarnessCICDZerotoHero
+  projectIdentifier: PythonToDocker
   ####################################################
   # CHANGE THIS: Your org name
   ###################################################
